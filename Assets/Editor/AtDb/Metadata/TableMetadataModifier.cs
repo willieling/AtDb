@@ -7,7 +7,7 @@ namespace AtDb
     public class TableMetaDataModifier : EditorWindow
     {
         private readonly TableMetadata defaultMetaData = new TableMetadata(true, true);
-        private readonly OjbectInspector objectInspector = new OjbectInspector();
+        private readonly ObjectInspector objectInspector = new ObjectInspector();
 
         private TableMetadata loadedMetadata;
 
@@ -68,7 +68,6 @@ namespace AtDb
 
         private void SetInspectorObject()
         {
-            //consider making loadedMetaData not a class field
             objectInspector.SetObject(loadedMetadata);
             ShowObjectJson();
         }

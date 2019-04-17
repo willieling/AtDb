@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace AtDb
 {
-    public class OjbectInspector
+    public class ObjectInspector
     {
         private const BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.Instance
             | BindingFlags.NonPublic;
@@ -17,7 +17,7 @@ namespace AtDb
         private FieldInfo[] objectFields;
         private PropertyInfo[] objectProperties;
 
-        public OjbectInspector()
+        public ObjectInspector()
         {
             memberManipulator = new ObjectMemberManipulator();
         }
