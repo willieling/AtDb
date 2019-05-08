@@ -1,4 +1,5 @@
 ﻿using AtDb.Reader;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 
@@ -11,6 +12,13 @@ namespace AtDb
         private string databaseSourcePath;
         private string databaseExportPath;
         private string generatedEnumsPath;
+
+        private void Awake()
+        {
+            databaseSourcePath = Path.GetFullPath(Application.dataPath + "/../ExcelFiles");
+            databaseExportPath = Path.GetFullPath(Application.dataPath + "/../ExcelFiles");
+            generatedEnumsPath = Path.GetFullPath(Application.dataPath + "/../ExcelFiles");
+        }
 
         [MenuItem("AtDb/Export Database")]
         private static void ShowWindow()
