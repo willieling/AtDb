@@ -4,9 +4,9 @@ using UnityEngine;
 
 namespace AtDb
 {
-    public class TableMetaDataModifier : EditorWindow
+    public class TableMetadataModifierWindow : EditorWindow
     {
-        private readonly TableMetadata defaultMetaData = new TableMetadata(true, true);
+        private readonly TableMetadata defaultMetaData = new TableMetadata();
         private readonly ObjectInspector objectInspector = new ObjectInspector();
 
         private TableMetadata loadedMetadata;
@@ -16,7 +16,7 @@ namespace AtDb
         [MenuItem("AtDb/Table Metadata")]
         private static void ShowWindow()
         {
-            GetWindow(typeof(TableMetaDataModifier));
+            GetWindow<TableMetadataModifierWindow>();
         }
 
         private void OnGUI()
@@ -93,7 +93,7 @@ namespace AtDb
 
         private void ShowObjectJson()
         {
-            jsonText = JSON.Dump(loadedMetadata, Constants.encodeOptions);
+            jsonText = JSON.Dump(loadedMetadata, Constants.ENCODE_OPTIONS);
         }
     }
 

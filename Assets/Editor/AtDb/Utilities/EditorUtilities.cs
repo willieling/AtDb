@@ -33,5 +33,4 @@ namespace AtDb
             EditorGUILayout.EndVertical();
         }
     }
-
 }
