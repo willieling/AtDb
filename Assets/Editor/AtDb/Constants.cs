@@ -9,6 +9,8 @@ namespace AtDb
         public const string TABLE_END_REGEX = "@@end";
 
         public const string ARRAY_MARKER = "_";
+
+        public const int INPUT_OFFSET = 125;
     }
 
 }
