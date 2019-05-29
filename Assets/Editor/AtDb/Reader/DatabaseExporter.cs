@@ -1,21 +1,21 @@
 ﻿using AtDb.Reader.Container;
-using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
-using System;
 using System.Collections.Generic;
 using System.IO;
-using TinyJSON;
 
 namespace AtDb.Reader
 {
     public class DatabaseExporter
     {
         private readonly AttributesParser attributesParser = new AttributesParser();
+        private readonly ClassMaker classMaker = new ClassMaker();
         public void Export(string folderPath)
         {
             string[] excelFiles = GetExcelFiles(folderPath);
-            IEnumerable<TableDataContainer> containers = GetTableDataContainers(excelFiles);
+            IEnumerable<TableDataContainer> tableDataContainers = GetTableDataContainers(excelFiles);
+            IEnumerable<ModelDataContainer> modelContainers = FillModelsWithData(tableDataContainers);
+            ExportModels(modelContainers);
         }
 
         private string[] GetExcelFiles(string folderPath)
@@ -99,11 +99,11 @@ namespace AtDb.Reader
             IRow nameRow = sheet.GetRow(rowIndex);
             ++rowIndex;
             IRow typeRow = sheet.GetRow(rowIndex);
-            ++rowIndex;
 
             List<AttributeDefinition> attributes = attributesParser.GetAttributes(nameRow, typeRow);
-            int startIndex = rowIndex;
             int endIndex = NO_INDEX;
+
+            List<IRow> rawData = new List<IRow>();
             do
             {
                 ++rowIndex;
@@ -119,25 +119,46 @@ namespace AtDb.Reader
                     endIndex = rowIndex;
                     break;
                 }
+
+                rawData.Add(row);
             }
             while (rowIndex < sheet.LastRowNum);
 
+            TableDataContainer container = new TableDataContainer(metadata, attributes, rawData);
             if (endIndex == NO_INDEX)
             {
+                container.MarkHasDataError();
                 //todo error logging
             }
 
-            TableDataContainer container = new TableDataContainer(metadata, attributes, startIndex, endIndex);
             return container;
         }
 
-        private TableMetadata GetMetaData(IRow row)
+        private IEnumerable<ModelDataContainer> FillModelsWithData(IEnumerable<TableDataContainer> tableContainers)
         {
-            const int SECOND_CELL_INDEX = 1;
+            List<ModelDataContainer> modelContainers = new List<ModelDataContainer>();
+            foreach (TableDataContainer tableContainer in tableContainers)
+            {
+                ModelDataContainer modelContainer = ConvertTableDataToModelData(tableContainer);
+                modelContainers.Add(modelContainer);
+            }
+            return modelContainers;
+        }
 
-            ICell metaDataCell = row.GetCell(SECOND_CELL_INDEX);
-            TableMetadata metaData = JSON.Load(metaDataCell.StringCellValue).Make<TableMetadata>();
-            return metaData;
+        private ModelDataContainer ConvertTableDataToModelData(TableDataContainer tableData)
+        {
+            object model = classMaker.MakeClass(tableData.metadata.ClassName);
+
+            ModelDataContainer modelContainer = new ModelDataContainer(classMaker, model, tableData);
+            return modelContainer;
+        }
+
+        private void ExportModels(IEnumerable<ModelDataContainer> modelContainers)
+        {
+            foreach (ModelDataContainer container in modelContainers)
+            {
+                //todo export
+            }
         }
     }
 }

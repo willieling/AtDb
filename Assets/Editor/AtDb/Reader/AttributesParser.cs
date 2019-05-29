@@ -1,6 +1,6 @@
-﻿using AtDb.Reader.Container;
+﻿using AtDb.Extensions;
+using AtDb.Reader.Container;
 using NPOI.SS.UserModel;
-using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
@@ -10,26 +10,36 @@ namespace AtDb.Reader
     {
         private IRow nameRow;
         private IRow typeRow;
-        private readonly List<AttributeDefinition> attributes = new List<AttributeDefinition>();
+        private List<AttributeDefinition> attributes;
 
         public List<AttributeDefinition> GetAttributes(IRow nameRow, IRow typeRow)
         {
             this.nameRow = nameRow;
             this.typeRow = typeRow;
-            attributes.Clear();
+            attributes = new List<AttributeDefinition>();
 
             for (int i = 0; i < this.nameRow.LastCellNum; ++i)
             {
-                if (IsArray(i))
+                if (ShouldInclude(i))
                 {
-                    i = CreateArrayAttribute(i);
-                }
-                else
-                {
-                    CreateSingleAttribute(i);
+                    if (IsArray(i))
+                    {
+                        i = AddArrayAttribute(i);
+                    }
+                    else
+                    {
+                        AddSingleAttribute(i);
+                    }
                 }
             }
             return attributes;
+        }
+
+        private bool ShouldInclude(int i)
+        {
+            ICell type = nameRow.GetCell(i);
+            bool hasMarker = TableUtilities.HasIncludeMarker(type.StringCellValue);
+            return hasMarker;
         }
 
         private bool IsArray(int i)
@@ -39,7 +49,7 @@ namespace AtDb.Reader
             return typeValue.Contains(Constants.ARRAY_MARKER);
         }
 
-        private int CreateArrayAttribute(int index)
+        private int AddArrayAttribute(int index)
         {
             AttributeDefinition attribute = CreateAttributeWithIndex(index);
             string startingName = attribute.Name;
@@ -66,21 +76,12 @@ namespace AtDb.Reader
 
         private string GetType(string typeString)
         {
-            const string BEFORE_UNDERSCORE = "(.+)_.+";
-            const int EXPECTED_GROUPS = 2;
-            const int FIRST_GROUP = 1;
-
-            Regex regex = new Regex(BEFORE_UNDERSCORE);
-            Match match = regex.Match(typeString);
-
-            if(match.Groups.Count != EXPECTED_GROUPS)
-            {
-                //todo error loggin
-            }
-            return match.Groups[FIRST_GROUP].Value;
+            Match match = Constants.beforeUnderscoreRegex.Match(typeString);
+            string type = match.GetFirstMatch();
+            return type;
         }
 
-        private void CreateSingleAttribute(int i)
+        private void AddSingleAttribute(int i)
         {
             AttributeDefinition attribute = CreateAttributeWithIndex(i);
             attributes.Add(attribute);
@@ -91,8 +92,23 @@ namespace AtDb.Reader
             ICell name = nameRow.GetCell(i);
             ICell type = typeRow.GetCell(i);
 
-            AttributeDefinition attribute = new AttributeDefinition(i, name.StringCellValue, type.StringCellValue);
+            string matchedName = ExtractName(name);
+
+            AttributeDefinition attribute = new AttributeDefinition(i, matchedName, type.StringCellValue);
             return attribute;
+        }
+
+        private string ExtractName(ICell name)
+        {
+            Match match = Constants.attributeMarkerRegex.Match(name.StringCellValue);
+            string extractedName = match.GetFirstMatch();
+
+            if (string.IsNullOrEmpty(extractedName))
+            {
+                //todo error logging
+            }
+
+            return extractedName;
         }
     }
 }

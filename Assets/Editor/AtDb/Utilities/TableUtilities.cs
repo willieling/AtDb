@@ -1,5 +1,4 @@
 ﻿using NPOI.SS.UserModel;
-using System;
 using System.Text.RegularExpressions;
 using TinyJSON;
 
@@ -32,8 +31,14 @@ namespace AtDb
             }
 
             string marker = firstCell.StringCellValue;
-            Regex regex = new Regex(Constants.TABLE_END_REGEX, RegexOptions.IgnoreCase);
-            return regex.IsMatch(marker);
+            bool isMatch = Constants.endTableRegex.IsMatch(marker);
+            return isMatch;
+        }
+
+        public static bool HasIncludeMarker(string value)
+        {
+            bool isMatch = Constants.attributeMarkerRegex.IsMatch(value);
+            return isMatch;
         }
     }
 }
