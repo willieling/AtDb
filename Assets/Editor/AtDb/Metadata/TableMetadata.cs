@@ -3,32 +3,43 @@ using TinyJSON;
 
 namespace AtDb
 {
+    public enum DataStyle
+    {
+        Direct,
+        List,
+        Dictionary
+    }
+
     [Serializable]
     public class TableMetadata
     {
+        [Include]
+        public string TableName { get; private set; }
+        [Include]
+        public string ClassName { get; private set; }
         [Include]
         public bool Encrypted { get; private set; }
         [Include]
         public bool Export { get; private set; }
         [Include]
-        public bool LookupTable { get; private set; }
-        [Include]
-        public bool IntermediateTable { get; private set; }
+        public DataStyle Style { get; private set; }
 
         public TableMetadata()
         {
+            TableName = string.Empty;
+            ClassName = string.Empty;
             Encrypted = true;
             Export = true;
-            LookupTable = true;
-            IntermediateTable = false;
+            Style = DataStyle.Dictionary;
         }
 
         public TableMetadata(TableMetadata original)
         {
+            TableName = original.TableName;
+            ClassName = original.ClassName;
             Encrypted = original.Encrypted;
             Export = original.Export;
-            LookupTable = original.LookupTable;
-            IntermediateTable = original.IntermediateTable;
+            Style = original.Style;
 
         }
     }

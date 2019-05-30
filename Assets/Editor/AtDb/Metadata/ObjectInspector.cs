@@ -4,7 +4,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
-namespace AtDb
+namespace AtDb.Metadata
 {
     public class ObjectInspector
     {
@@ -123,8 +123,6 @@ namespace AtDb
             object currentValue = field.GetValue(inspectedObject);
             object newValue = memberManipulator.DrawMemberUi(currentValue);
             field.SetValue(inspectedObject, newValue);
-            //object value = memberInspector.DrawFieldUi(field);
-            //field.SetValue(inspectedObject, value);
         }
 
         private void DrawPropertiesUi()
@@ -137,8 +135,7 @@ namespace AtDb
 
         private void DrawPropertyUi(PropertyInfo property)
         {
-            const int LAYOUT_WIDTH = 400;
-            GUILayout.Label(property.Name.ToString(), GUILayout.Width(LAYOUT_WIDTH));
+            GUILayout.Label(property.Name.ToString(), GUILayout.Width(Constants.INPUT_OFFSET));
 
             object currentValue = property.GetValue(inspectedObject);
             object newValue = memberManipulator.DrawMemberUi(currentValue);
