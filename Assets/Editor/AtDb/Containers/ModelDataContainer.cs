@@ -8,8 +8,9 @@ namespace AtDb.Reader.Container
         private readonly ClassMaker classMaker;
         private object model;
         private TableDataContainer tableData;
+        private AbstractModelFiller modelFiller;
 
-        public string DataString { get; private set; }
+        public TableMetadata MetaData { get { return tableData.metadata; } }
 
         public ModelDataContainer(ClassMaker classMaker, object model, TableDataContainer tableData)
         {
@@ -20,10 +21,14 @@ namespace AtDb.Reader.Container
             FillModelWithData();
         }
 
+        public string GetDataAsJson()
+        {
+            string json = modelFiller.DumpDataToJson();
+            return json;
+        }
+
         private void FillModelWithData()
         {
-            AbstractModelFiller modelFiller;
-
             //todo pool modelFillers?
             switch (tableData.metadata.Style)
             {
@@ -43,8 +48,6 @@ namespace AtDb.Reader.Container
 
             //todo move model and table data arguments to fill function
             modelFiller.Fill();
-            string json = modelFiller.DumpDataToJson();
-            DataString = json;
         }
     }
 }

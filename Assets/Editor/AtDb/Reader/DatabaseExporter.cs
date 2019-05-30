@@ -1,6 +1,7 @@
 ﻿using AtDb.Reader.Container;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -10,12 +11,26 @@ namespace AtDb.Reader
     {
         private readonly AttributesParser attributesParser = new AttributesParser();
         private readonly ClassMaker classMaker = new ClassMaker();
-        public void Export(string folderPath)
+
+        private bool isExporting;
+
+        public string DatabaseSourcePath { get; set; }
+        public string DatabaseExportPath { get; set; }
+        public string GeneratedEnumsPath { get; set; }
+
+        public void Export()
         {
-            string[] excelFiles = GetExcelFiles(folderPath);
+            if(isExporting)
+            {
+                return;
+            }
+
+            isExporting = true;
+
+            string[] excelFiles = GetExcelFiles(DatabaseSourcePath);
             IEnumerable<TableDataContainer> tableDataContainers = GetTableDataContainers(excelFiles);
             IEnumerable<ModelDataContainer> modelContainers = FillModelsWithData(tableDataContainers);
-            ExportModels(modelContainers);
+            WriteDataToFiles(modelContainers);
         }
 
         private string[] GetExcelFiles(string folderPath)
@@ -153,12 +168,26 @@ namespace AtDb.Reader
             return modelContainer;
         }
 
-        private void ExportModels(IEnumerable<ModelDataContainer> modelContainers)
+        private void WriteDataToFiles(IEnumerable<ModelDataContainer> modelContainers)
         {
+            DirectorUtilities.CreateDirectoryIfNeeded(DatabaseExportPath);
+
             foreach (ModelDataContainer container in modelContainers)
             {
-                //todo export
+                WriteDataToFile(container);
             }
+
+            isExporting = false;
+        }
+
+        private void WriteDataToFile(ModelDataContainer container)
+        {
+            const string FULL_FILE_PATH = "{0}/{1}.json";
+
+            string json = container.GetDataAsJson();
+            string filename = container.MetaData.TableName;
+            string fullPath = string.Format(FULL_FILE_PATH, DatabaseExportPath, filename);
+            File.WriteAllText(fullPath, json);
         }
     }
 }
