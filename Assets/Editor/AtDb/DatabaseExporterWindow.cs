@@ -9,15 +9,11 @@ namespace AtDb
     {
         private readonly DatabaseExporter databaseReader = new DatabaseExporter();
 
-        private string databaseSourcePath;
-        private string databaseExportPath;
-        private string generatedEnumsPath;
-
         private void Awake()
         {
-            databaseSourcePath = Path.GetFullPath(Application.dataPath + "/../ExcelFiles");
-            databaseExportPath = Path.GetFullPath(Application.dataPath + "/../ExcelFiles");
-            generatedEnumsPath = Path.GetFullPath(Application.dataPath + "/../ExcelFiles");
+            databaseReader.DatabaseSourcePath = Path.GetFullPath(Application.dataPath + "/../ExcelFiles");
+            databaseReader.DatabaseExportPath = Path.GetFullPath(Application.dataPath + "/DefaultDatabase");
+            databaseReader.GeneratedEnumsPath = Path.GetFullPath(Application.dataPath + "/GeneratedEnums");
         }
 
         [MenuItem("AtDb/Export Database")]
@@ -40,9 +36,9 @@ namespace AtDb
             {
                 EditorGUILayout.BeginVertical();
                 {
-                    databaseSourcePath = DrawSelectablePathUi("Database Source Path", databaseSourcePath);
-                    databaseExportPath = DrawSelectablePathUi("Database Export Path", databaseExportPath);
-                    generatedEnumsPath = DrawSelectablePathUi("Exported Enums Path", generatedEnumsPath);
+                    databaseReader.DatabaseSourcePath = DrawSelectablePathUi("Database Source Path", databaseReader.DatabaseSourcePath);
+                    databaseReader.DatabaseExportPath = DrawSelectablePathUi("Database Export Path", databaseReader.DatabaseExportPath);
+                    databaseReader.GeneratedEnumsPath = DrawSelectablePathUi("Exported Enums Path", databaseReader.GeneratedEnumsPath);
                 }
                 EditorGUILayout.EndVertical();
             }
@@ -71,7 +67,7 @@ namespace AtDb
         {
             if(GUILayout.Button("Export"))
             {
-                databaseReader.Export(databaseSourcePath);
+                databaseReader.Export();
             }
         }
     }
