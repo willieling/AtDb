@@ -18,7 +18,7 @@ namespace AtDb
         [Include]
         public string ClassName { get; private set; }
         [Include]
-        public bool Encrypted { get; private set; }
+        public bool Compress { get; private set; }
         [Include]
         public bool Export { get; private set; }
         [Include]
@@ -28,7 +28,7 @@ namespace AtDb
         {
             TableName = string.Empty;
             ClassName = string.Empty;
-            Encrypted = true;
+            Compress = true;
             Export = true;
             Style = DataStyle.Dictionary;
         }
@@ -37,7 +37,7 @@ namespace AtDb
         {
             TableName = original.TableName;
             ClassName = original.ClassName;
-            Encrypted = original.Encrypted;
+            Compress = original.Compress;
             Export = original.Export;
             Style = original.Style;
 

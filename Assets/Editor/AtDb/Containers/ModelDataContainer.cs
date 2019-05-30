@@ -21,9 +21,14 @@ namespace AtDb.Reader.Container
             FillModelWithData();
         }
 
-        public string GetDataAsJson()
+        public string GetDataAsString()
         {
             string json = modelFiller.DumpDataToJson();
+            if (MetaData.Compress)
+            {
+                json = Compress(json);
+            }
+
             return json;
         }
 
@@ -48,6 +53,12 @@ namespace AtDb.Reader.Container
 
             //todo move model and table data arguments to fill function
             modelFiller.Fill();
+        }
+
+        private string Compress(string json)
+        {
+            string base64 = EncoderUtilities.Base64Encode(json);
+            return base64;
         }
     }
 }

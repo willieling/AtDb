@@ -178,13 +178,14 @@ namespace AtDb.Reader
             }
 
             isExporting = false;
+            UnityEditor.EditorUtility.DisplayDialog("Export", "Export complete!", "ok");
         }
 
         private void WriteDataToFile(ModelDataContainer container)
         {
             const string FULL_FILE_PATH = "{0}/{1}.json";
 
-            string json = container.GetDataAsJson();
+            string json = container.GetDataAsString();
             string filename = container.MetaData.TableName;
             string fullPath = string.Format(FULL_FILE_PATH, DatabaseExportPath, filename);
             File.WriteAllText(fullPath, json);
