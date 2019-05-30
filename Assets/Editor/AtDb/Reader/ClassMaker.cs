@@ -22,20 +22,33 @@ namespace AtDb.Reader
             {
                 assemblyTypes.Add(type.Name, type);
             }
+
+            CachePrimitives();
         }
 
         public object MakeClass(string className)
         {
-            Type type = GetClasstype(className);
+            Type type = assemblyTypes[className];
             ObjectHandle objectHandle = Activator.CreateInstance(mainAssembly.FullName, type.FullName) as ObjectHandle;
             object classInstance = objectHandle.Unwrap();
 
             return classInstance;
         }
 
-        private Type GetClasstype(string className)
+        public Type GetType(string name)
         {
-            return assemblyTypes[className];
+            return assemblyTypes[name];
+        }
+
+        private void CachePrimitives()
+        {
+            //TODO check if this can be removed
+            assemblyTypes.Add("bool", typeof(bool));
+            assemblyTypes.Add("string", typeof(string));
+            assemblyTypes.Add("int", typeof(int));
+            assemblyTypes.Add("long", typeof(long));
+            assemblyTypes.Add("float", typeof(float));
+            assemblyTypes.Add("double", typeof(double));
         }
     }
 }

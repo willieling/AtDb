@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace AtDb
+﻿namespace AtDb
 {
     public class ListObject : BaseDataElement
     {
@@ -8,6 +6,6 @@ namespace AtDb
         public int aInt;
         public float aFloat;
         public string aString;
-        public string[] stringArray;
+        public int[] intArray;
     }
 }

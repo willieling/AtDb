@@ -46,19 +46,24 @@ namespace AtDb.Reader
         {
             ICell type = typeRow.GetCell(i);
             string typeValue = type.StringCellValue;
-            return typeValue.Contains(Constants.ARRAY_MARKER);
+            bool contains = typeValue.Contains(Constants.ARRAY_MARKER);
+            return contains;
         }
 
         private int AddArrayAttribute(int index)
         {
             AttributeDefinition attribute = CreateAttributeWithIndex(index);
+            attributes.Add(attribute);
+
             string startingName = attribute.Name;
 
             int peekIndex = index + 1;
-            for (; peekIndex < nameRow.LastCellNum; ++index)
+            while(peekIndex < nameRow.LastCellNum)
             {
-                ICell name = nameRow.GetCell(peekIndex);
-                bool sameName = string.Compare(name.StringCellValue, startingName, true) == 0;
+                ICell nameCell = nameRow.GetCell(peekIndex);
+                string name = ExtractName(nameCell);
+
+                bool sameName = string.Compare(name, startingName, true) == 0;
                 if (sameName)
                 {
                     attribute.IncrementEndIndex();
@@ -68,6 +73,7 @@ namespace AtDb.Reader
                     break;
                 }
 
+                ++index;
                 peekIndex = index + 1;
             }
 
@@ -92,9 +98,10 @@ namespace AtDb.Reader
             ICell name = nameRow.GetCell(i);
             ICell type = typeRow.GetCell(i);
 
-            string matchedName = ExtractName(name);
+            string extractedName = ExtractName(name);
+            string extractedType = ExtractType(type);
 
-            AttributeDefinition attribute = new AttributeDefinition(i, matchedName, type.StringCellValue);
+            AttributeDefinition attribute = new AttributeDefinition(i, extractedName, extractedType);
             return attribute;
         }
 
@@ -109,6 +116,15 @@ namespace AtDb.Reader
             }
 
             return extractedName;
+        }
+
+        private string ExtractType(ICell cellType)
+        {
+            string type = cellType.StringCellValue;
+            int index = type.IndexOf(Constants.ARRAY_MARKER);
+            int length = index == -1 ? type.Length : index;
+            string extracted = type.Substring(0, length);
+            return extracted;
         }
     }
 }

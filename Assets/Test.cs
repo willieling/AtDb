@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
@@ -9,22 +10,11 @@ public class Test : MonoBehaviour
 
     void Start()
     {
-        const int EXEPCTED_MEMBERS = 1;
+        List<int> test = new List<int>();
+        IList ilist = test;
 
-        object model = new TestObject();
-        Type modelType = model.GetType();
-        FieldInfo[] fields = modelType.GetFields(BINDING_FLAGS);
-        PropertyInfo[] properties = modelType.GetProperties(BINDING_FLAGS);
-
-        if (fields.Length + properties.Length > EXEPCTED_MEMBERS)
-        {
-            //todo error logging
-        }
-
-        FieldInfo field = fields[0];
-        Type fieldType = field.FieldType;
-        TypeInfo typeInfo = fieldType.GetTypeInfo();
-        Type generic = typeInfo.GenericTypeArguments[0];
+        object obj = 5;
+        ilist.Add(obj);
     }
 }
 
