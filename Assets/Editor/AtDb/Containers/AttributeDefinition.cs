@@ -7,10 +7,11 @@ namespace AtDb.Reader.Container
     [DebuggerDisplay("Name: {Name}, Type: {Type}, {StartIndex}-{EndIndex}")]
     public class AttributeDefinition
     {
+        private const int INCLUSIVE_OFFSET = 1;
 
         public int StartIndex { get; private set; }
         /// <summary>
-        /// The index of the last element.
+        /// The (inclusive) index of the last element.
         /// </summary>
         public int EndIndex { get; private set; }
         public string Type { get; private set; }
@@ -20,6 +21,8 @@ namespace AtDb.Reader.Container
         {
             get { return StartIndex == EndIndex; }
         }
+
+        public int Length { get { return (EndIndex - StartIndex) + INCLUSIVE_OFFSET; } }
 
         public AttributeDefinition(int index, string name, string type)
         {

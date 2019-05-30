@@ -2,6 +2,7 @@
 using AtDb.Reader.Container;
 using NPOI.SS.UserModel;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using TinyJSON;
@@ -120,15 +121,27 @@ namespace AtDb.ModelFillers
 
         private object GetMultipleCellValue(AttributeDefinition attribute, IRow row)
         {
-            int count = attribute.EndIndex - attribute.StartIndex + 1;
-            List<object> list = new List<object>(count);
-            for (int i = attribute.StartIndex; i <= attribute.EndIndex; ++i)
+            Array array = GetarrayForAttributeType(attribute);
+            for (int i = attribute.StartIndex, j = 0; i <= attribute.EndIndex; ++i, ++j)
             {
                 ICell cell = row.GetCell(i);
                 object value = GetCellValue(attribute.Type, cell);
-                list.Add(value);
+                array.SetValue(value, j);
             }
-            return list;
+
+            return array;
+        }
+
+        private Array GetarrayForAttributeType(AttributeDefinition attribute)
+        {
+            Type genericType = classMaker.GetType(attribute.Type);
+            Array array = Array.CreateInstance(genericType, attribute.Length);
+            return array;
+        }
+
+        private Converter<object, string> ConvertObjectToT()
+        {
+            return (item) => (string)item;
         }
 
         private object GetCellValue(string type, ICell cell)
