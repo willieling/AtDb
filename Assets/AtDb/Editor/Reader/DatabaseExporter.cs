@@ -22,8 +22,8 @@ namespace AtDb.Reader
 
         public void Initialize(DatabaseExporterConfiguration configuration)
         {
-            serializationFunction = configuration.serializationFunction;
-            compressionFunction = configuration.compressionFunction;
+            serializationFunction = configuration.SerializationFunction;
+            compressionFunction = configuration.CompressionFunction;
         }
 
         public void Export()
