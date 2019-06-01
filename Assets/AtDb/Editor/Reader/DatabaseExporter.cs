@@ -13,10 +13,18 @@ namespace AtDb.Reader
         private readonly ClassMaker classMaker = new ClassMaker();
 
         private bool isExporting;
+        private Func<object, string> serializationFunction;
+        private Func<string, string> compressionFunction;
 
         public string DatabaseSourcePath { get; set; }
         public string DatabaseExportPath { get; set; }
         public string GeneratedEnumsPath { get; set; }
+
+        public void Initialize(DatabaseExporterConfiguration configuration)
+        {
+            serializationFunction = configuration.SerializationFunction;
+            compressionFunction = configuration.CompressionFunction;
+        }
 
         public void Export()
         {
@@ -183,12 +191,22 @@ namespace AtDb.Reader
 
         private void WriteDataToFile(ModelDataContainer container)
         {
-            const string FULL_FILE_PATH = "{0}/{1}.json";
+            const string FULL_FILE_PATH = "{0}/{1}";
 
-            string json = container.GetDataAsString();
+            string serializedData = SerializeModel(container);
             string filename = container.MetaData.TableName;
             string fullPath = string.Format(FULL_FILE_PATH, DatabaseExportPath, filename);
-            File.WriteAllText(fullPath, json);
+            File.WriteAllText(fullPath, serializedData);
+        }
+
+        private string SerializeModel(ModelDataContainer container)
+        {
+            string serializedData = serializationFunction.Invoke(container.model);
+            if (container.MetaData.Compress)
+            {
+                serializedData = compressionFunction.Invoke(serializedData);
+            }
+            return serializedData;
         }
     }
 }
