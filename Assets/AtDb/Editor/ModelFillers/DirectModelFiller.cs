@@ -6,13 +6,15 @@ namespace AtDb.ModelFillers
 {
     public class DirectModelFiller : AbstractModelFiller
     {
-        public DirectModelFiller(ClassMaker classMaker, object model, TableDataContainer tableData) : base(classMaker, model, tableData)
+        public DirectModelFiller(ClassMaker classMaker) : base(classMaker)
         {
         }
 
-        public override void Fill()
+        public override void Fill(object model, TableDataContainer tableData)
         {
             const int EXPECTED_COUNT = 1;
+
+            base.Fill(model, tableData);
 
             currentDataObject = model as BaseDataElement;
 

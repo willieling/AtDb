@@ -9,22 +9,25 @@ namespace AtDb.ModelFillers
     public abstract class AbstractModelFiller
     {
         protected readonly ClassMaker classMaker;
-        protected readonly object model;
-        protected readonly TableDataContainer tableData;
-        protected readonly Type modelType;
+
+        protected object model;
+        protected TableDataContainer tableData;
+        protected Type modelType;
 
         public BaseDataElement currentDataObject;
 
-        public AbstractModelFiller(ClassMaker classMaker, object model, TableDataContainer tableData)
+        public AbstractModelFiller(ClassMaker classMaker)
         {
             this.classMaker = classMaker;
+        }
+
+        public virtual void Fill(object model, TableDataContainer tableData)
+        {
             this.model = model;
             this.tableData = tableData;
 
             modelType = model.GetType();
         }
-
-        public abstract void Fill();
 
         protected Type GetGenericTypeAtIndex(object collection, int FIRST_ARGUMENT)
         {

@@ -8,12 +8,14 @@ namespace AtDb.ModelFillers
 {
     public class ListModelFiller : CollectionModelFiller
     {
-        public ListModelFiller(ClassMaker classMaker, object model, TableDataContainer tableData) : base(classMaker, model, tableData)
+        public ListModelFiller(ClassMaker classMaker) : base(classMaker)
         {
         }
 
-        public override void Fill()
+        public override void Fill(object model, TableDataContainer tableData)
         {
+            base.Fill(model, tableData);
+
             IList modelList = CreateCollection<IList>();
 
             foreach (IRow row in tableData.rawData)
