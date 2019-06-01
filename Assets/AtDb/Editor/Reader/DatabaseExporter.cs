@@ -4,7 +4,6 @@ using NPOI.XSSF.UserModel;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using UnityEngine;
 
 namespace AtDb.Reader
 {
@@ -13,7 +12,6 @@ namespace AtDb.Reader
         private readonly AttributesParser attributesParser = new AttributesParser();
         private readonly ClassMaker classMaker = new ClassMaker();
 
-        //todo remove isExporting
         private bool isExporting;
         private Func<object, string> serializationFunction;
         private Func<string, string> compressionFunction;
