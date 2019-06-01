@@ -2,10 +2,7 @@
 using AtDb.Reader.Container;
 using NPOI.SS.UserModel;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Reflection;
-using TinyJSON;
 
 namespace AtDb.ModelFillers
 {
@@ -28,12 +25,6 @@ namespace AtDb.ModelFillers
         }
 
         public abstract void Fill();
-
-        public string DumpDataToJson()
-        {
-            string json = JSON.Dump(model, Constants.ENCODE_OPTIONS);
-            return json;
-        }
 
         protected Type GetGenericTypeAtIndex(object collection, int FIRST_ARGUMENT)
         {

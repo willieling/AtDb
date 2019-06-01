@@ -5,8 +5,9 @@ namespace AtDb.Reader.Container
 {
     public class ModelDataContainer
     {
+        public object model;
+
         private readonly ClassMaker classMaker;
-        private object model;
         private TableDataContainer tableData;
         private AbstractModelFiller modelFiller;
 
@@ -19,17 +20,6 @@ namespace AtDb.Reader.Container
             this.tableData = tableData;
 
             FillModelWithData();
-        }
-
-        public string GetDataAsString()
-        {
-            string json = modelFiller.DumpDataToJson();
-            if (MetaData.Compress)
-            {
-                json = Compress(json);
-            }
-
-            return json;
         }
 
         private void FillModelWithData()
@@ -53,12 +43,6 @@ namespace AtDb.Reader.Container
 
             //todo move model and table data arguments to fill function
             modelFiller.Fill();
-        }
-
-        private string Compress(string json)
-        {
-            string base64 = EncoderUtilities.Base64Encode(json);
-            return base64;
         }
     }
 }

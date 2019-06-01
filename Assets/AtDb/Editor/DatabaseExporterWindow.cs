@@ -7,13 +7,15 @@ namespace AtDb
 {
     public class DatabaseExporterWindow : EditorWindow
     {
-        private readonly DatabaseExporter databaseReader = new DatabaseExporter();
+        private readonly DatabaseExporter exporter = new DatabaseExporter();
 
         private void Awake()
         {
-            databaseReader.DatabaseSourcePath = Path.GetFullPath(Application.dataPath + "/../ExcelFiles");
-            databaseReader.DatabaseExportPath = Path.GetFullPath(Application.dataPath + "/DefaultDatabase");
-            databaseReader.GeneratedEnumsPath = Path.GetFullPath(Application.dataPath + "/GeneratedEnums");
+            exporter.DatabaseSourcePath = Path.GetFullPath(Application.dataPath + "/../ExcelFiles");
+            exporter.DatabaseExportPath = Path.GetFullPath(Application.dataPath + "/DefaultDatabase");
+            exporter.GeneratedEnumsPath = Path.GetFullPath(Application.dataPath + "/GeneratedEnums");
+
+            exporter.Initialize(new DatabaseExporterConfiguration());
         }
 
         [MenuItem("AtDb/Export Database")]
@@ -36,9 +38,9 @@ namespace AtDb
             {
                 EditorGUILayout.BeginVertical();
                 {
-                    databaseReader.DatabaseSourcePath = DrawSelectablePathUi("Database Source Path", databaseReader.DatabaseSourcePath);
-                    databaseReader.DatabaseExportPath = DrawSelectablePathUi("Database Export Path", databaseReader.DatabaseExportPath);
-                    databaseReader.GeneratedEnumsPath = DrawSelectablePathUi("Exported Enums Path", databaseReader.GeneratedEnumsPath);
+                    exporter.DatabaseSourcePath = DrawSelectablePathUi("Database Source Path", exporter.DatabaseSourcePath);
+                    exporter.DatabaseExportPath = DrawSelectablePathUi("Database Export Path", exporter.DatabaseExportPath);
+                    exporter.GeneratedEnumsPath = DrawSelectablePathUi("Exported Enums Path", exporter.GeneratedEnumsPath);
                 }
                 EditorGUILayout.EndVertical();
             }
@@ -67,7 +69,7 @@ namespace AtDb
         {
             if(GUILayout.Button("Export"))
             {
-                databaseReader.Export();
+                exporter.Export();
             }
         }
     }
