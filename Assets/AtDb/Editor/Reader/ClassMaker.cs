@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.Remoting;
@@ -29,6 +29,7 @@ namespace AtDb.Reader
         public object MakeClass(string className)
         {
             Type type = assemblyTypes[className];
+
             ObjectHandle objectHandle = Activator.CreateInstance(mainAssembly.FullName, type.FullName) as ObjectHandle;
             object classInstance = objectHandle.Unwrap();
 

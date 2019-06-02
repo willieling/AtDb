@@ -8,13 +8,13 @@ namespace AtDb.ModelFillers
 {
     public abstract class AbstractModelFiller
     {
+        public BaseDataElement currentDataObject;
+
         protected readonly ClassMaker classMaker;
 
         protected object model;
         protected TableDataContainer tableData;
         protected Type modelType;
-
-        public BaseDataElement currentDataObject;
 
         public AbstractModelFiller(ClassMaker classMaker)
         {

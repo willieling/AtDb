@@ -1,18 +1,18 @@
 ﻿using AtDb.ModelFillers;
+using AtDb.ModelFillers.Pool;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 
 namespace AtDb.Reader.Container
 {
     public class ModelContainerFactory
     {
-        private ClassMaker classMaker;
+        private readonly ClassMaker classMaker;
+        private readonly ModelFillerTypePool fillerPool;
 
-        public ModelContainerFactory(ClassMaker classMaker)
+        public ModelContainerFactory(ClassMaker classMaker, ModelFillerTypePool fillerPool)
         {
             this.classMaker = classMaker;
+            this.fillerPool = fillerPool;
         }
 
         public ModelDataContainer Create(TableDataContainer tableData)
@@ -37,13 +37,13 @@ namespace AtDb.Reader.Container
             switch (style)
             {
                 case DataStyle.Direct:
-                    modelFiller = new DirectModelFiller(classMaker);
+                    modelFiller = fillerPool.GetFiller<DirectModelFiller>();
                     break;
                 case DataStyle.List:
-                    modelFiller = new ListModelFiller(classMaker);
+                    modelFiller = fillerPool.GetFiller<ListModelFiller>();
                     break;
                 case DataStyle.Dictionary:
-                    modelFiller = new DictionaryModelFiller(classMaker);
+                    modelFiller = fillerPool.GetFiller<DictionaryModelFiller>();
                     break;
                 default:
                     //todo better error checking
@@ -52,31 +52,5 @@ namespace AtDb.Reader.Container
 
             return modelFiller;
         }
-
-        //private void FillModelWithData()
-        //{
-        //    //todo move this functionality outisde the class
-        //    //create a factory to make ModelDataContainer
-
-        //    //todo pool modelFillers?
-        //    switch (tableData.metadata.Style)
-        //    {
-        //        case DataStyle.Direct:
-        //            modelFiller = new DirectModelFiller(classMaker, model, tableData);
-        //            break;
-        //        case DataStyle.List:
-        //            modelFiller = new ListModelFiller(classMaker, model, tableData);
-        //            break;
-        //        case DataStyle.Dictionary:
-        //            modelFiller = new DictionaryModelFiller(classMaker, model, tableData);
-        //            break;
-        //        default:
-        //            //todo better error checking
-        //            throw new Exception();
-        //    }
-
-        //    //todo move model and table data arguments to fill function
-        //    modelFiller.Fill();
-        //}
     }
 }

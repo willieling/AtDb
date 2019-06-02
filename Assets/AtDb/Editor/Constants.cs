@@ -14,6 +14,7 @@ namespace AtDb
         public const string ATTRIBUTE_MARKER_PATTERN = @"\s+@(.+)";
 
         public const int INPUT_OFFSET = 125;
+        public const int THREADS = 8;
 
         public static readonly Regex beforeUnderscoreRegex = new Regex(BEFORE_UNDERSCORE_PATTERN);
         public static readonly Regex attributeMarkerRegex = new Regex(ATTRIBUTE_MARKER_PATTERN);
