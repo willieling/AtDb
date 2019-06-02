@@ -6,10 +6,15 @@ namespace AtDb.ModelFillers
 {
     public abstract class CollectionModelFiller : AbstractModelFiller
     {
-        protected readonly CollectionInfo collectionInfo;
+        protected CollectionInfo collectionInfo;
 
-        public CollectionModelFiller(ClassMaker classMaker, object model, TableDataContainer tableData) : base(classMaker, model, tableData)
+        public CollectionModelFiller(ClassMaker classMaker) : base(classMaker)
         {
+        }
+
+        public override void Fill(object model, TableDataContainer tableData)
+        {
+            base.Fill(model, tableData);
             collectionInfo = new CollectionInfo(modelType);
         }
 

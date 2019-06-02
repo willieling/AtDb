@@ -8,12 +8,13 @@ namespace AtDb.ModelFillers
 {
     public class DictionaryModelFiller : CollectionModelFiller
     {
-        public DictionaryModelFiller(ClassMaker classMaker, object model, TableDataContainer tableData) : base(classMaker, model, tableData)
+        public DictionaryModelFiller(ClassMaker classMaker) : base(classMaker)
         {
         }
 
-        public override void Fill()
+        public override void Fill(object model, TableDataContainer tableData)
         {
+            base.Fill(model, tableData);
             IDictionary dictionary = CreateCollection<IDictionary>();
 
             foreach (IRow row in tableData.rawData)

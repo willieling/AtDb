@@ -10,7 +10,8 @@ namespace AtDb.Reader
     public class DatabaseExporter
     {
         private readonly AttributesParser attributesParser = new AttributesParser();
-        private readonly ClassMaker classMaker = new ClassMaker();
+        private readonly ModelContainerFactoryFactory modelContainerFactoryFactory = new ModelContainerFactoryFactory();
+        private ModelContainerFactory modelContainerFactory;
 
         private bool isExporting;
         private Func<object, string> serializationFunction;
@@ -19,6 +20,11 @@ namespace AtDb.Reader
         public string DatabaseSourcePath { get; set; }
         public string DatabaseExportPath { get; set; }
         public string GeneratedEnumsPath { get; set; }
+
+        public DatabaseExporter()
+        {
+            
+        }
 
         public void Initialize(DatabaseExporterConfiguration configuration)
         {
@@ -159,6 +165,7 @@ namespace AtDb.Reader
 
         private IEnumerable<ModelDataContainer> FillModelsWithData(IEnumerable<TableDataContainer> tableContainers)
         {
+            modelContainerFactory = modelContainerFactoryFactory.Create();
             List<ModelDataContainer> modelContainers = new List<ModelDataContainer>();
             foreach (TableDataContainer tableContainer in tableContainers)
             {
@@ -170,9 +177,7 @@ namespace AtDb.Reader
 
         private ModelDataContainer ConvertTableDataToModelData(TableDataContainer tableData)
         {
-            object model = classMaker.MakeClass(tableData.metadata.ClassName);
-
-            ModelDataContainer modelContainer = new ModelDataContainer(classMaker, model, tableData);
+            ModelDataContainer modelContainer = modelContainerFactory.Create(tableData);
             return modelContainer;
         }
 
@@ -194,15 +199,15 @@ namespace AtDb.Reader
             const string FULL_FILE_PATH = "{0}/{1}";
 
             string serializedData = SerializeModel(container);
-            string filename = container.MetaData.TableName;
+            string filename = container.metadata.TableName;
             string fullPath = string.Format(FULL_FILE_PATH, DatabaseExportPath, filename);
             File.WriteAllText(fullPath, serializedData);
         }
 
         private string SerializeModel(ModelDataContainer container)
         {
-            string serializedData = serializationFunction.Invoke(container.model);
-            if (container.MetaData.Compress)
+            string serializedData = serializationFunction.Invoke(container.data);
+            if (container.metadata.Compress)
             {
                 serializedData = compressionFunction.Invoke(serializedData);
             }
