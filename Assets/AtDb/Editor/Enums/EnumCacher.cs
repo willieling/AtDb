@@ -37,7 +37,7 @@ namespace AtDb.Enums
 
         public void CacheEnum(string name, string[] values)
         {
-            EnumContainer container = EnumContainer.CreateFlaggedEnumContainer(name, values);
+            EnumContainer container = EnumContainer.CreateEnumContainer(name, values);
             cachedEnums.Add(name, container);
         }
 
