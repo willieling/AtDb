@@ -7,7 +7,9 @@ namespace AtDb
     {
         Direct,
         List,
-        Dictionary
+        Dictionary,
+        Enum,
+        EnumFlagged,
     }
 
     [Serializable]
@@ -23,6 +25,12 @@ namespace AtDb
         public bool Export { get; private set; }
         [Include]
         public DataStyle Style { get; private set; }
+
+        [Exclude]
+        public bool IsEnum
+        {
+            get { return Style == DataStyle.Enum || Style == DataStyle.EnumFlagged; }
+        }
 
         public TableMetadata()
         {

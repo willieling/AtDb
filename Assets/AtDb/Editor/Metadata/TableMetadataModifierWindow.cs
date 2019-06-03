@@ -51,6 +51,7 @@ namespace AtDb
         private void LoadJsonFromtextField()
         {
             loadedMetadata = JSON.Load(jsonText).Make<TableMetadata>();
+            SetInspectorObject();
         }
 
         private void DrawLoadDefaultButton()

@@ -7,10 +7,10 @@ namespace AtDb.Reader.Container
         private readonly ClassMaker classMaker;
         private readonly ModelFillerTypePool fillerPool;
 
-        public ModelContainerFactoryFactory()
+        public ModelContainerFactoryFactory(ClassMaker classMaker)
         {
-            classMaker = new ClassMaker();
-            fillerPool = new ModelFillerTypePool(classMaker, Constants.THREADS);
+            this.classMaker = classMaker;
+            fillerPool = new ModelFillerTypePool(this.classMaker, Constants.THREADS);
         }
 
         public ModelContainerFactory Create()
