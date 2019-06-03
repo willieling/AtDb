@@ -31,7 +31,14 @@ namespace AtDb.Enums
         private void CacheEnumValues(AttributeDefinition attribute)
         {
             string[] values = GetValues();
-            enumCacher.CacheValues(attribute.Name, values);
+            if (attribute.IsFlaggedEnum)
+            {
+                enumCacher.CacheEnumFlagged(attribute.Name, values);
+            }
+            else
+            {
+                enumCacher.CacheEnum(attribute.Name, values);
+            }
         }
 
         private string[] GetValues()

@@ -18,7 +18,6 @@ namespace AtDb.Reader
         private ModelContainerFactory modelContainerFactory;
 
         private bool isExporting;
-        
 
         public DatabaseExporter()
         {

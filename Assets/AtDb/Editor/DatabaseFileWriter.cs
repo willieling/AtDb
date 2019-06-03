@@ -35,9 +35,9 @@ namespace AtDb
             DirectorUtilities.CreateDirectoryIfNeeded(GeneratedEnumsPath);
             DirectorUtilities.CreateDirectoryIfNeeded(DatabaseExportPath);
 
-            foreach (KeyValuePair<string, string[]> kvp in enumCacher.cachedEnums)
+            foreach (KeyValuePair<string, EnumContainer> kvp in enumCacher.cachedEnums)
             {
-                ExportEnumToFile(kvp.Key, kvp.Value);
+                ExportEnumToFile(kvp.Value);
             }
 
             foreach (ModelDataContainer container in modelContainers)
@@ -49,34 +49,42 @@ namespace AtDb
             UnityEditor.EditorUtility.DisplayDialog("Export", "Export complete!", "ok");
         }
 
-        private void ExportEnumToFile(string enumName, string[] values)
+        private void ExportEnumToFile(EnumContainer container)
         {
             const string ENUM_FILE_PATH = "{0}/{1}.cs";
 
-            string fullPath = string.Format(ENUM_FILE_PATH, GeneratedEnumsPath, enumName);
-            string serializedEnum = SerializeEnum(enumName, values);
+            string fullPath = string.Format(ENUM_FILE_PATH, GeneratedEnumsPath, container.name);
+            string serializedEnum = SerializeEnum(container);
 
             CreateFile(fullPath, serializedEnum);
         }
 
-        private string SerializeEnum(string enumName, string[] values)
+        private string SerializeEnum(EnumContainer container)
         {
-            //todo handle flagged enums
-            StringBuilder sb = new StringBuilder("namespace GeneratedEnums\n");
+            StringBuilder sb = new StringBuilder("using System;");
+            sb.AppendLine("");
+            sb.AppendLine("namespace GeneratedEnums");
             sb.AppendLine("{");
-            sb.AppendFormat("    public enum {0}\n", enumName);
+            if(container.isFlagged)
+            {
+                sb.AppendLine("    [Flags]");
+            }
+            sb.AppendFormat("    public enum {0}\n", container.name);
             sb.AppendLine("    {");
-            AddValues(values, sb);
+            AddEnumValues(container, sb);
             sb.AppendLine("    }");
             sb.AppendLine("}");
             return sb.ToString();
         }
 
-        private static void AddValues(string[] values, StringBuilder sb)
+        private static void AddEnumValues(EnumContainer container, StringBuilder sb)
         {
-            foreach (string value in values)
+            bool flag = container.isFlagged;
+            for (int i = 0; i < container.values.Length; ++i)
             {
-                sb.AppendFormat("        {0},\n", value);
+                string value = container.values[i];
+                string suffix = flag ? string.Format(" = 1 << {0}", i) : string.Empty;
+                sb.AppendFormat("        {0}{1},\n", value, suffix);
             }
         }
 

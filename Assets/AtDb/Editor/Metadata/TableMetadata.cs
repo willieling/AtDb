@@ -9,7 +9,6 @@ namespace AtDb
         List,
         Dictionary,
         Enum,
-        EnumFlagged,
     }
 
     [Serializable]
@@ -29,7 +28,7 @@ namespace AtDb
         [Exclude]
         public bool IsEnum
         {
-            get { return Style == DataStyle.Enum || Style == DataStyle.EnumFlagged; }
+            get { return Style == DataStyle.Enum; }
         }
 
         public TableMetadata()

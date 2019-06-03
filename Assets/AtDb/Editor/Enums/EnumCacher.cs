@@ -8,7 +8,7 @@ namespace AtDb.Enums
     {
         public const int NO_VALUE = -1;
 
-        public readonly Dictionary<string, string[]> cachedEnums = new Dictionary<string, string[]>();
+        public readonly Dictionary<string, EnumContainer> cachedEnums = new Dictionary<string, EnumContainer>();
 
         private readonly ClassMaker classMaker;
 
@@ -24,8 +24,8 @@ namespace AtDb.Enums
 
         public string[] GetEnumValues(string enumName)
         {
-            string[] values = cachedEnums[enumName];
-            return values;
+            EnumContainer container = cachedEnums[enumName];
+            return container.values;
         }
 
         public int GetEnumValueIndex(string enumName, string enumValue)
@@ -35,15 +35,23 @@ namespace AtDb.Enums
             return index;
         }
 
-        public void CacheValues(string name, string[] values)
+        public void CacheEnum(string name, string[] values)
         {
-            cachedEnums.Add(name, values);
+            EnumContainer container = EnumContainer.CreateFlaggedEnumContainer(name, values);
+            cachedEnums.Add(name, container);
+        }
+
+        public void CacheEnumFlagged(string name, string[] values)
+        {
+            EnumContainer container = EnumContainer.CreateFlaggedEnumContainer(name, values);
+            cachedEnums.Add(name, container);
         }
 
         public void CacheValues(string name)
         {
             string[] values = ParseEnumForValues(name);
-            cachedEnums.Add(name, values);
+            EnumContainer container = EnumContainer.CreateFlaggedEnumContainer(name, values);
+            cachedEnums.Add(name, container);
         }
 
         private int FindIndex(string[] values, string enumValue)
