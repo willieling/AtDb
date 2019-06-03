@@ -29,14 +29,6 @@ namespace AtDb.ModelFillers
             modelType = model.GetType();
         }
 
-        protected Type GetGenericTypeAtIndex(object collection, int FIRST_ARGUMENT)
-        {
-            Type collectionType = collection.GetType();
-            TypeInfo typeInfo = collectionType.GetTypeInfo();
-            Type generic = typeInfo.GenericTypeArguments[FIRST_ARGUMENT];
-            return generic;
-        }
-
         protected void SetValue(AttributeDefinition attribute, IRow row)
         {
             if (IsField(attribute))
@@ -131,11 +123,6 @@ namespace AtDb.ModelFillers
             Type genericType = classMaker.GetType(attribute.Type);
             Array array = Array.CreateInstance(genericType, attribute.Length);
             return array;
-        }
-
-        private Converter<object, string> ConvertObjectToT()
-        {
-            return (item) => (string)item;
         }
 
         private object GetCellValue(string type, ICell cell)

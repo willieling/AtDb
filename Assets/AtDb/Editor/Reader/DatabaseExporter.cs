@@ -1,7 +1,7 @@
-﻿using AtDb.Reader.Container;
+﻿using AtDb.Enums;
+using AtDb.Reader.Container;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
-using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -9,27 +9,44 @@ namespace AtDb.Reader
 {
     public class DatabaseExporter
     {
-        private readonly AttributesParser attributesParser = new AttributesParser();
-        private readonly ModelContainerFactoryFactory modelContainerFactoryFactory = new ModelContainerFactoryFactory();
+        private readonly AttributesParser attributesParser;
+        private readonly ClassMaker classMaker;
+        private readonly ModelContainerFactoryFactory modelContainerFactoryFactory;
+        private readonly EnumCacher enumCacher;
+        private readonly DatabaseFileWriter databaseWriter;
+
         private ModelContainerFactory modelContainerFactory;
 
         private bool isExporting;
-        private Func<object, string> serializationFunction;
-        private Func<string, string> compressionFunction;
-
-        public string DatabaseSourcePath { get; set; }
-        public string DatabaseExportPath { get; set; }
-        public string GeneratedEnumsPath { get; set; }
 
         public DatabaseExporter()
         {
-            
+            attributesParser = new AttributesParser();
+            classMaker = new ClassMaker();
+            modelContainerFactoryFactory = new ModelContainerFactoryFactory(classMaker);
+            enumCacher = new EnumCacher(classMaker);
+            databaseWriter = new DatabaseFileWriter(enumCacher);
+        }
+
+        public string DatabaseSourcePath
+        {
+            get { return databaseWriter.DatabaseSourcePath; }
+            set { databaseWriter.DatabaseSourcePath = value; }
+        }
+        public string DatabaseExportPath
+        {
+            get { return databaseWriter.DatabaseExportPath; }
+            set { databaseWriter.DatabaseExportPath = value; }
+        }
+        public string GeneratedEnumsPath
+        {
+            get { return databaseWriter.GeneratedEnumsPath; }
+            set { databaseWriter.GeneratedEnumsPath = value; }
         }
 
         public void Initialize(DatabaseExporterConfiguration configuration)
         {
-            serializationFunction = configuration.SerializationFunction;
-            compressionFunction = configuration.CompressionFunction;
+            databaseWriter.Initialize(configuration);
         }
 
         public void Export()
@@ -44,7 +61,8 @@ namespace AtDb.Reader
             string[] excelFiles = GetExcelFiles(DatabaseSourcePath);
             IEnumerable<TableDataContainer> tableDataContainers = GetTableDataContainers(excelFiles);
             IEnumerable<ModelDataContainer> modelContainers = FillModelsWithData(tableDataContainers);
-            WriteDataToFiles(modelContainers);
+            databaseWriter.ExportAllData(modelContainers);
+            isExporting = false;
         }
 
         private string[] GetExcelFiles(string folderPath)
@@ -167,51 +185,32 @@ namespace AtDb.Reader
         {
             modelContainerFactory = modelContainerFactoryFactory.Create();
             List<ModelDataContainer> modelContainers = new List<ModelDataContainer>();
+
+            CacheEnumValues(tableContainers);
+
             foreach (TableDataContainer tableContainer in tableContainers)
             {
-                ModelDataContainer modelContainer = ConvertTableDataToModelData(tableContainer);
-                modelContainers.Add(modelContainer);
+                if (!tableContainer.metadata.IsEnum)
+                {
+                    ModelDataContainer modelContainer = modelContainerFactory.Create(tableContainer);
+                    modelContainers.Add(modelContainer);
+                }
             }
             return modelContainers;
         }
 
-        private ModelDataContainer ConvertTableDataToModelData(TableDataContainer tableData)
+        private void CacheEnumValues(IEnumerable<TableDataContainer> tableContainers)
         {
-            ModelDataContainer modelContainer = modelContainerFactory.Create(tableData);
-            return modelContainer;
-        }
-
-        private void WriteDataToFiles(IEnumerable<ModelDataContainer> modelContainers)
-        {
-            DirectorUtilities.CreateDirectoryIfNeeded(DatabaseExportPath);
-
-            foreach (ModelDataContainer container in modelContainers)
+            EnumGatherer enumGatherer = enumCacher.GetGatherer();
+            foreach (TableDataContainer tableContainer in tableContainers)
             {
-                WriteDataToFile(container);
+                if (tableContainer.metadata.IsEnum)
+                {
+                    enumGatherer.CacheEnumValues(tableContainer);
+                }
             }
-
-            isExporting = false;
-            UnityEditor.EditorUtility.DisplayDialog("Export", "Export complete!", "ok");
         }
 
-        private void WriteDataToFile(ModelDataContainer container)
-        {
-            const string FULL_FILE_PATH = "{0}/{1}";
-
-            string serializedData = SerializeModel(container);
-            string filename = container.metadata.TableName;
-            string fullPath = string.Format(FULL_FILE_PATH, DatabaseExportPath, filename);
-            File.WriteAllText(fullPath, serializedData);
-        }
-
-        private string SerializeModel(ModelDataContainer container)
-        {
-            string serializedData = serializationFunction.Invoke(container.data);
-            if (container.metadata.Compress)
-            {
-                serializedData = compressionFunction.Invoke(serializedData);
-            }
-            return serializedData;
-        }
+        
     }
 }

@@ -1,4 +1,5 @@
 ﻿using AtDb.Extensions;
+using System;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 
@@ -8,6 +9,7 @@ namespace AtDb.Reader.Container
     public class AttributeDefinition
     {
         private const int INCLUSIVE_OFFSET = 1;
+        private const string ENUM_FLAGGED = "flagged";
 
         public int StartIndex { get; private set; }
         /// <summary>
@@ -20,6 +22,11 @@ namespace AtDb.Reader.Container
         public bool IsSingleValue
         {
             get { return StartIndex == EndIndex; }
+        }
+
+        public bool IsFlaggedEnum
+        {
+            get { return string.Equals(Type, ENUM_FLAGGED, StringComparison.OrdinalIgnoreCase); }
         }
 
         public int Length { get { return (EndIndex - StartIndex) + INCLUSIVE_OFFSET; } }

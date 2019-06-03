@@ -9,7 +9,7 @@ namespace AtDb
     {
         private readonly DatabaseExporter exporter = new DatabaseExporter();
 
-        private void Awake()
+        private void OnEnable()
         {
             exporter.DatabaseSourcePath = Path.GetFullPath(Application.dataPath + "/../ExcelFiles");
             exporter.DatabaseExportPath = Path.GetFullPath(Application.dataPath + "/DefaultDatabase");
