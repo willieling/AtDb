@@ -35,22 +35,22 @@ namespace AtDb.Enums
             return index;
         }
 
-        public void CacheEnum(string name, string[] values)
+        public void CacheEnum(string name, string[] values, EnumContainer.EnumStyle style)
         {
-            EnumContainer container = EnumContainer.CreateEnumContainer(name, values);
+            if(style == EnumContainer.EnumStyle.AlreadyExistsNoExport)
+            {
+                //todo error logging
+                return;
+            }
+
+            EnumContainer container = new EnumContainer(name, values, style);
             cachedEnums.Add(name, container);
         }
 
-        public void CacheEnumFlagged(string name, string[] values)
-        {
-            EnumContainer container = EnumContainer.CreateFlaggedEnumContainer(name, values);
-            cachedEnums.Add(name, container);
-        }
-
-        public void CacheValues(string name)
+        public void CacheExistingEnum(string name)
         {
             string[] values = ParseEnumForValues(name);
-            EnumContainer container = EnumContainer.CreateFlaggedEnumContainer(name, values);
+            EnumContainer container = new EnumContainer(name, values, EnumContainer.EnumStyle.AlreadyExistsNoExport);
             cachedEnums.Add(name, container);
         }
 

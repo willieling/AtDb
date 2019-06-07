@@ -1,5 +1,6 @@
 ﻿using AtDb.Reader.Container;
 using NPOI.SS.UserModel;
+using System;
 using System.Collections.Generic;
 
 namespace AtDb.Enums
@@ -31,13 +32,16 @@ namespace AtDb.Enums
         private void CacheEnumValues(AttributeDefinition attribute)
         {
             string[] values = GetValues();
-            if (attribute.IsFlaggedEnum)
+
+            EnumContainer.EnumStyle style;
+            bool parsed = Enum.TryParse(attribute.Type, out style);
+            if(!parsed)
             {
-                enumCacher.CacheEnumFlagged(attribute.Name, values);
+                //todo error logging
             }
             else
             {
-                enumCacher.CacheEnum(attribute.Name, values);
+                enumCacher.CacheEnum(attribute.Name, values, style);
             }
         }
 
