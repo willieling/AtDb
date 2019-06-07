@@ -4,13 +4,13 @@ using AtDb.Reader.Container;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace AtDb
 {
     public class DatabaseFileWriter
     {
-        private EnumCacher enumCacher;
+        private readonly EnumCacher enumCacher;
+        private readonly EnumGenerator enumGenerator;
 
         private Func<object, string> serializationFunction;
         private Func<string, string> compressionFunction;
@@ -22,6 +22,7 @@ namespace AtDb
         public DatabaseFileWriter(EnumCacher enumCacher)
         {
             this.enumCacher = enumCacher;
+            enumGenerator = new EnumGenerator(this.enumCacher);
         }
 
         public void Initialize(DatabaseExporterConfiguration configuration)
@@ -35,9 +36,11 @@ namespace AtDb
             DirectorUtilities.CreateDirectoryIfNeeded(GeneratedEnumsPath);
             DirectorUtilities.CreateDirectoryIfNeeded(DatabaseExportPath);
 
-            foreach (KeyValuePair<string, EnumContainer> kvp in enumCacher.cachedEnums)
+            Dictionary<string, string> generatedEnums = enumGenerator.Generate();
+
+            foreach (KeyValuePair<string, string> kvp in generatedEnums)
             {
-                ExportEnumToFile(kvp.Value);
+                ExportEnumToFile(kvp.Key, kvp.Value);
             }
 
             foreach (ModelDataContainer container in modelContainers)
@@ -49,43 +52,12 @@ namespace AtDb
             UnityEditor.EditorUtility.DisplayDialog("Export", "Export complete!", "ok");
         }
 
-        private void ExportEnumToFile(EnumContainer container)
+        private void ExportEnumToFile(string name, string generatedEnum)
         {
             const string ENUM_FILE_PATH = "{0}/{1}.cs";
 
-            string fullPath = string.Format(ENUM_FILE_PATH, GeneratedEnumsPath, container.name);
-            string serializedEnum = SerializeEnum(container);
-
-            CreateFile(fullPath, serializedEnum);
-        }
-
-        private string SerializeEnum(EnumContainer container)
-        {
-            StringBuilder sb = new StringBuilder("using System;");
-            sb.AppendLine("");
-            sb.AppendLine("namespace GeneratedEnums");
-            sb.AppendLine("{");
-            if(container.isFlagged)
-            {
-                sb.AppendLine("    [Flags]");
-            }
-            sb.AppendFormat("    public enum {0}\n", container.name);
-            sb.AppendLine("    {");
-            AddEnumValues(container, sb);
-            sb.AppendLine("    }");
-            sb.AppendLine("}");
-            return sb.ToString();
-        }
-
-        private static void AddEnumValues(EnumContainer container, StringBuilder sb)
-        {
-            bool flag = container.isFlagged;
-            for (int i = 0; i < container.values.Length; ++i)
-            {
-                string value = container.values[i];
-                string suffix = flag ? string.Format(" = 1 << {0}", i) : string.Empty;
-                sb.AppendFormat("        {0}{1},\n", value, suffix);
-            }
+            string fullPath = string.Format(ENUM_FILE_PATH, GeneratedEnumsPath, name);
+            CreateFile(fullPath, generatedEnum);
         }
 
         private void ExportDataToFile(ModelDataContainer container)

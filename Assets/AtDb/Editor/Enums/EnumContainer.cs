@@ -2,25 +2,23 @@
 {
     public class EnumContainer
     {
+        public enum EnumStyle
+        {
+            AlreadyExistsNoExport,
+            Normal,
+            Flagged,
+            Composite
+        }
+
         public readonly string name;
         public readonly string[] values;
-        public readonly bool isFlagged;
+        public readonly EnumStyle style;
 
-        public static EnumContainer CreateEnumContainer(string name, string[] values)
-        {
-            return new EnumContainer(name, values, false);
-        }
-
-        public static EnumContainer CreateFlaggedEnumContainer(string name, string[] values)
-        {
-            return new EnumContainer(name, values, true);
-        }
-
-        private EnumContainer(string name, string[] values, bool isFlagged)
+        public EnumContainer(string name, string[] values, EnumStyle style)
         {
             this.name = name;
             this.values = values;
-            this.isFlagged = isFlagged;
+            this.style = style;
         }
     }
 }

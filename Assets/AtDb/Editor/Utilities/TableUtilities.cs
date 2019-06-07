@@ -25,7 +25,7 @@ namespace AtDb
         public static bool IsTableEnd(IRow row)
         {
             ICell firstCell = row.GetCell(0);
-            if(firstCell.CellType != CellType.String)
+            if(firstCell == null || firstCell.CellType != CellType.String)
             {
                 return false;
             }
