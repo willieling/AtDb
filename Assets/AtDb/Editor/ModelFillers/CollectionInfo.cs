@@ -1,10 +1,17 @@
-﻿using System;
+﻿using AtDb.ErrorSystem;
+using System;
 using System.Reflection;
 
 namespace AtDb.ModelFillers
 {
     public class CollectionInfo
     {
+        public enum CollectionInfoError
+        {
+            None,
+            UnexpectedAmountOfMembers
+        }
+
         private Type modelType;
 
         public Type CollectionType { get; private set; }
@@ -18,6 +25,8 @@ namespace AtDb.ModelFillers
 
         public FieldInfo CollectionField { get; private set; }
         public PropertyInfo CollectionProperty { get; private set; }
+
+        public CollectionInfoError Error { get; private set; }
 
         public CollectionInfo(Type modelType)
         {
@@ -42,7 +51,7 @@ namespace AtDb.ModelFillers
 
             if (fields.Length + properties.Length > EXEPCTED_MEMBERS)
             {
-                //todo error logging
+                Error = CollectionInfoError.UnexpectedAmountOfMembers;
             }
 
             Type type;

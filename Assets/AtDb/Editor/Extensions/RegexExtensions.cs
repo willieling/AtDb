@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using AtDb.ErrorSystem;
+using System.Text.RegularExpressions;
 
 namespace AtDb.Extensions
 {
@@ -6,19 +7,9 @@ namespace AtDb.Extensions
     {
         public static string GetFirstMatch(this Match match)
         {
-            const int EXPECTED_GROUPS = 2;
-            const int FIRST_GROUP = 1;
+            const int FIRST_GROUPING = 1;
 
-            string value = string.Empty;
-            if (match.Groups.Count == EXPECTED_GROUPS)
-            {
-                value = match.Groups[FIRST_GROUP].Value;
-            }
-            else
-            {
-                //todo error logging
-            }
-
+            string value = match.Groups[FIRST_GROUPING].Value;
             return value;
         }
     }

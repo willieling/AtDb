@@ -1,4 +1,5 @@
-﻿using AtDb.Reader.Container;
+﻿using AtDb.ErrorSystem;
+using AtDb.Reader.Container;
 using NPOI.SS.UserModel;
 using System;
 using System.Collections.Generic;
@@ -35,13 +36,13 @@ namespace AtDb.Enums
 
             EnumContainer.EnumStyle style;
             bool parsed = Enum.TryParse(attribute.Type, out style);
-            if(!parsed)
+            if (parsed)
             {
-                //todo error logging
+                enumCacher.CacheEnum(attribute.Name, values, style);
             }
             else
             {
-                enumCacher.CacheEnum(attribute.Name, values, style);
+                enumCacher.ErrorLogger.AddError("Cannot parse enum type '{0}'", attribute.Type, attribute.Name);
             }
         }
 

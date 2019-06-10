@@ -21,7 +21,8 @@ namespace AtDb
         [MenuItem("AtDb/Export Database")]
         private static void ShowWindow()
         {
-            GetWindow<DatabaseExporterWindow>();
+            DatabaseExporterWindow window = GetWindow<DatabaseExporterWindow>();
+            window.minSize = new Vector2(500, 500);
         }
 
         private void OnGUI()

@@ -1,4 +1,5 @@
-﻿using AtDb.Extensions;
+﻿using AtDb.ErrorSystem;
+using AtDb.Extensions;
 using AtDb.Reader.Container;
 using NPOI.SS.UserModel;
 using System.Collections.Generic;
@@ -6,11 +7,18 @@ using System.Text.RegularExpressions;
 
 namespace AtDb.Reader
 {
-    public class AttributesParser
+    public class AttributesParser : IErrorLogger
     {
         private IRow nameRow;
         private IRow typeRow;
         private List<AttributeDefinition> attributes;
+
+        public ErrorLogger ErrorLogger { get; private set; }
+
+        public AttributesParser()
+        {
+            ErrorLogger = new ErrorLogger();
+        }
 
         public List<AttributeDefinition> GetAttributes(IRow nameRow, IRow typeRow)
         {
@@ -80,13 +88,6 @@ namespace AtDb.Reader
             return index;
         }
 
-        private string GetType(string typeString)
-        {
-            Match match = Constants.beforeUnderscoreRegex.Match(typeString);
-            string type = match.GetFirstMatch();
-            return type;
-        }
-
         private void AddSingleAttribute(int i)
         {
             AttributeDefinition attribute = CreateAttributeWithIndex(i);
@@ -105,14 +106,24 @@ namespace AtDb.Reader
             return attribute;
         }
 
-        private string ExtractName(ICell name)
+        private string ExtractName(ICell nameCell)
         {
-            Match match = Constants.attributeMarkerRegex.Match(name.StringCellValue);
-            string extractedName = match.GetFirstMatch();
+            string name = nameCell.StringCellValue;
+            Match match = Constants.attributeMarkerRegex.Match(name);
+
+            string extractedName = string.Empty;
+            if (match.Groups.Count >= 2)
+            {
+                extractedName = match.GetFirstMatch();
+            }
+            else
+            {
+                ErrorLogger.AddError(nameCell, "Could not extract name from {0}", name);
+            }
 
             if (string.IsNullOrEmpty(extractedName))
             {
-                //todo error logging
+                ErrorLogger.AddError(nameCell, "Extracted name is empty");
             }
 
             return extractedName;
@@ -124,6 +135,11 @@ namespace AtDb.Reader
             int index = type.IndexOf(Constants.ARRAY_MARKER);
             int length = index == -1 ? type.Length : index;
             string extracted = type.Substring(0, length);
+            if(string.IsNullOrEmpty(extracted))
+            {
+                ErrorLogger.AddError(cellType, "Could not extract type from '{0}'", type);
+            }
+
             return extracted;
         }
     }

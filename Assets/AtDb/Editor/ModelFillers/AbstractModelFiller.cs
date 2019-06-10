@@ -1,4 +1,5 @@
-﻿using AtDb.Reader;
+﻿using AtDb.ErrorSystem;
+using AtDb.Reader;
 using AtDb.Reader.Container;
 using NPOI.SS.UserModel;
 using System;
@@ -6,7 +7,7 @@ using System.Reflection;
 
 namespace AtDb.ModelFillers
 {
-    public abstract class AbstractModelFiller
+    public abstract class AbstractModelFiller : IErrorLogger
     {
         public BaseDataElement currentDataObject;
 
@@ -16,9 +17,14 @@ namespace AtDb.ModelFillers
         protected TableDataContainer tableData;
         protected Type modelType;
 
+
+        public ErrorLogger ErrorLogger { get; private set; }
+
+
         public AbstractModelFiller(ClassMaker classMaker)
         {
             this.classMaker = classMaker;
+            ErrorLogger = new ErrorLogger();
         }
 
         public virtual void Fill(object model, TableDataContainer tableData)
@@ -41,7 +47,8 @@ namespace AtDb.ModelFillers
             }
             else
             {
-                //todo error logging
+                ErrorLogger.AddError("Cannot find attribute '{0}' in Model '{1}'",
+                    attribute.Name, model.GetType());
             }
         }
 
@@ -128,30 +135,38 @@ namespace AtDb.ModelFillers
         private object GetCellValue(string type, ICell cell)
         {
             object value;
-            switch(type)
+            try
             {
-                case "int":
-                    value = (int)cell.NumericCellValue;
-                    break;
-                case "long":
-                    value = (long)cell.NumericCellValue;
-                    break;
-                case "float":
-                    value = (float)cell.NumericCellValue;
-                    break;
-                case "double":
-                    value = cell.NumericCellValue;
-                    break;
-                case "string":
-                    value = cell.StringCellValue;
-                    break;
-                case "bool":
-                    value = cell.BooleanCellValue;
-                    break;
-                default:
-                    //todo log error
-                    value = null;
-                    break;
+                switch (type)
+                {
+                    case "int":
+                        value = (int)cell.NumericCellValue;
+                        break;
+                    case "long":
+                        value = (long)cell.NumericCellValue;
+                        break;
+                    case "float":
+                        value = (float)cell.NumericCellValue;
+                        break;
+                    case "double":
+                        value = cell.NumericCellValue;
+                        break;
+                    case "string":
+                        value = cell.StringCellValue;
+                        break;
+                    case "bool":
+                        value = cell.BooleanCellValue;
+                        break;
+                    default:
+                        ErrorLogger.AddError(cell, "No case defined for primitive type '{0}'.", type);
+                        value = null;
+                        break;
+                }
+            }
+            catch
+            {
+                value = null;
+                ErrorLogger.AddError(cell, "Could not get '{0}' value from cell.", type);
             }
 
             return value;

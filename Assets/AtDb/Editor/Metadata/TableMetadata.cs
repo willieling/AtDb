@@ -9,6 +9,7 @@ namespace AtDb
         List,
         Dictionary,
         Enum,
+        Combiner,
     }
 
     [Serializable]

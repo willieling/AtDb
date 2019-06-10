@@ -1,10 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using AtDb.ErrorSystem;
 using AtDb.Reader;
+using System;
+using System.Collections.Generic;
 
 namespace AtDb.Enums
 {
-    public class EnumCacher
+    public class EnumCacher : IErrorLogger
     {
         public const int NO_VALUE = -1;
 
@@ -12,14 +13,22 @@ namespace AtDb.Enums
 
         private readonly ClassMaker classMaker;
 
+        public ErrorLogger ErrorLogger { get; private set; }
+
         public EnumCacher(ClassMaker classMaker)
         {
             this.classMaker = classMaker;
+            ErrorLogger = new ErrorLogger();
         }
 
         public EnumGatherer GetGatherer()
         {
             return new EnumGatherer(this);
+        }
+
+        public void Clear()
+        {
+            cachedEnums.Clear();
         }
 
         public string[] GetEnumValues(string enumName)
@@ -39,7 +48,7 @@ namespace AtDb.Enums
         {
             if(style == EnumContainer.EnumStyle.AlreadyExistsNoExport)
             {
-                //todo error logging
+                ErrorLogger.AddError("Enum '{0}' is labeled as already existing.", name);
                 return;
             }
 

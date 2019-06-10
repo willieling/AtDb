@@ -1,5 +1,4 @@
 ﻿using NPOI.SS.UserModel;
-using System;
 using System.Collections.Generic;
 
 namespace AtDb.Reader.Container
@@ -11,7 +10,6 @@ namespace AtDb.Reader.Container
         public readonly List<IRow> rawData;
 
         public bool IsExported { get; private set; }
-        public bool HasDataError { get; private set; }
 
         public TableDataContainer(TableMetadata metadata, List<AttributeDefinition> attributes, List<IRow> rawData)
         {
@@ -23,11 +21,6 @@ namespace AtDb.Reader.Container
         public void MarkAsExported()
         {
             IsExported = true;
-        }
-
-        internal void MarkHasDataError()
-        {
-            HasDataError = true;
         }
     }
 }
