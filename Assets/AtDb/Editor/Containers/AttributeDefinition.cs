@@ -24,11 +24,6 @@ namespace AtDb.Reader.Container
             get { return StartIndex == EndIndex; }
         }
 
-        public bool IsFlaggedEnum
-        {
-            get { return string.Equals(Type, ENUM_FLAGGED, StringComparison.OrdinalIgnoreCase); }
-        }
-
         public int Length { get { return (EndIndex - StartIndex) + INCLUSIVE_OFFSET; } }
 
         public AttributeDefinition(int index, string name, string type)
@@ -42,21 +37,6 @@ namespace AtDb.Reader.Container
         public void IncrementEndIndex()
         {
             ++EndIndex;
-        }
-
-        private string GetName(string name)
-        {
-            const int EXPECTED_GROUPS = 2;
-
-            Match match = Constants.attributeMarkerRegex.Match(name);
-
-            string extractedName = string.Empty;
-            if (match.Groups.Count == EXPECTED_GROUPS)
-            {
-                extractedName = match.GetFirstMatch();
-            }
-
-            return name;
         }
     }
 }

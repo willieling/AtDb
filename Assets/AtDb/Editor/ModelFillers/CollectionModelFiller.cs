@@ -16,6 +16,7 @@ namespace AtDb.ModelFillers
         {
             base.Fill(model, tableData);
             collectionInfo = new CollectionInfo(modelType);
+            LogError();
         }
 
         protected void SetModelCollectionMember(object collection)
@@ -40,6 +41,16 @@ namespace AtDb.ModelFillers
         {
             BaseDataElement genericObject = Activator.CreateInstance(elementType) as BaseDataElement;
             return genericObject;
+        }
+
+        private void LogError()
+        {
+            switch (collectionInfo.Error)
+            {
+                case CollectionInfo.CollectionInfoError.UnexpectedAmountOfMembers:
+                    ErrorLogger.AddError("Unexpected amount of members in {0}", modelType.FullName);
+                    break;
+            }
         }
     }
 }

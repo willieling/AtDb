@@ -20,8 +20,8 @@ namespace AtDb
         public static readonly Regex attributeMarkerRegex = new Regex(ATTRIBUTE_MARKER_PATTERN);
         public static readonly Regex endTableRegex = new Regex(TABLE_END_REGEX, RegexOptions.IgnoreCase);
 
-        private const string BEFORE_UNDERSCORE_PATTERN = "(.+)_.+";
-        private const string ATTRIBUTE_NAME_PATTERN = "(.+)_.+";
+        private const string BEFORE_UNDERSCORE_PATTERN = "(.+)_.*";
+        private const string ATTRIBUTE_NAME_PATTERN = "(.+)_.*";
     }
 
 }

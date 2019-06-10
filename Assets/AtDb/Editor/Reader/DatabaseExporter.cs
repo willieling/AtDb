@@ -1,4 +1,5 @@
 ﻿using AtDb.Enums;
+using AtDb.ErrorSystem;
 using AtDb.Reader.Container;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
@@ -7,25 +8,33 @@ using System.IO;
 
 namespace AtDb.Reader
 {
-    public class DatabaseExporter
+    public class DatabaseExporter : IErrorLogger
     {
         private readonly AttributesParser attributesParser;
         private readonly ClassMaker classMaker;
+        private readonly BookReference bookReference;
         private readonly ModelContainerFactoryFactory modelContainerFactoryFactory;
         private readonly EnumCacher enumCacher;
         private readonly DatabaseFileWriter databaseWriter;
+        private readonly ErrorReporter errorReporter;
 
         private ModelContainerFactory modelContainerFactory;
 
         private bool isExporting;
 
+        public ErrorLogger ErrorLogger { get; private set; }
+
         public DatabaseExporter()
         {
             attributesParser = new AttributesParser();
             classMaker = new ClassMaker();
+            bookReference = new BookReference();
             modelContainerFactoryFactory = new ModelContainerFactoryFactory(classMaker);
             enumCacher = new EnumCacher(classMaker);
             databaseWriter = new DatabaseFileWriter(enumCacher);
+            errorReporter = new ErrorReporter(bookReference);
+
+            ErrorLogger = new ErrorLogger();
         }
 
         public string DatabaseSourcePath
@@ -56,24 +65,45 @@ namespace AtDb.Reader
                 return;
             }
 
+            Reset();
+
             isExporting = true;
 
             string[] excelFiles = GetExcelFiles(DatabaseSourcePath);
             IEnumerable<TableDataContainer> tableDataContainers = GetTableDataContainers(excelFiles);
             IEnumerable<ModelDataContainer> modelContainers = FillModelsWithData(tableDataContainers);
             databaseWriter.ExportAllData(modelContainers);
+            errorReporter.PrintNotices();
+
             isExporting = false;
+        }
+
+        private void Reset()
+        {
+            errorReporter.Clear();
+            enumCacher.Clear();
         }
 
         private string[] GetExcelFiles(string folderPath)
         {
             const string ONLY_EXCEL = "*.xlsx";
             string[] files = Directory.GetFiles(folderPath, ONLY_EXCEL);
+            if (files.Length == 0)
+            {
+                ErrorLogger.AddError("Could not find any excels files at {0}", folderPath);
+            }
+
             return files;
         }
 
         private IEnumerable<TableDataContainer> GetTableDataContainers(string[] files)
         {
+            if (errorReporter.HasErrors)
+            {
+                FlagStopExport();
+                return null;
+            }
+
             List<TableDataContainer> containers = new List<TableDataContainer>();
             foreach (string file in files)
             {
@@ -84,11 +114,25 @@ namespace AtDb.Reader
             return containers;
         }
 
-        private IEnumerable<TableDataContainer> GetTableDataContainersFromExcelFile(string file)
+        private IEnumerable<TableDataContainer> GetTableDataContainersFromExcelFile(string filePath)
         {
-            XSSFWorkbook workbook = GetWorkbook(file);
+            if (errorReporter.HasErrors)
+            {
+                FlagStopExport();
+                return null;
+            }
+
+            XSSFWorkbook workbook = GetWorkbook(filePath);
+            bookReference.AddBookWithPath(workbook, filePath);
+
             IEnumerable<TableDataContainer> containers = GetTableDatacontainersFromWorkbook(workbook);
             return containers;
+        }
+
+        private void FlagStopExport()
+        {
+            errorReporter.PrintNotices();
+            isExporting = false;
         }
 
         private XSSFWorkbook GetWorkbook(string file)
@@ -135,6 +179,8 @@ namespace AtDb.Reader
                 }
             }
 
+            ErrorLogger.CopyNotices(attributesParser);
+
             return containers;
         }
 
@@ -174,15 +220,22 @@ namespace AtDb.Reader
             TableDataContainer container = new TableDataContainer(metadata, attributes, rawData);
             if (endIndex == NO_INDEX)
             {
-                container.MarkHasDataError();
-                //todo error logging
+                ErrorLogger.AddError("Could not find ending for table {0}", metadata.TableName);
             }
+
+            ErrorLogger.CopyNotices(attributesParser);
 
             return container;
         }
 
         private IEnumerable<ModelDataContainer> FillModelsWithData(IEnumerable<TableDataContainer> tableContainers)
         {
+            if (errorReporter.HasErrors)
+            {
+                FlagStopExport();
+                return null;
+            }
+
             modelContainerFactory = modelContainerFactoryFactory.Create();
             List<ModelDataContainer> modelContainers = new List<ModelDataContainer>();
 
@@ -196,6 +249,10 @@ namespace AtDb.Reader
                     modelContainers.Add(modelContainer);
                 }
             }
+
+            errorReporter.LogNotices(modelContainerFactory);
+
+
             return modelContainers;
         }
 
@@ -209,8 +266,8 @@ namespace AtDb.Reader
                     enumGatherer.CacheEnumValues(tableContainer);
                 }
             }
-        }
 
-        
+            errorReporter.LogNotices(enumCacher);
+        }
     }
 }
